@@ -6,29 +6,17 @@ import {
   InvocationResult,
   Provider,
   ValueOrPromise,
-  inject,
-  Getter,
-} from '@loopback/context';
-import {
-  AuthenticationBindings,
-  AuthenticationMetadata,
-} from '@loopback/authentication';
-import {RequiredPermissions, MyUserProfile} from '../types';
-import {intersection} from 'lodash';
-import {HttpErrors} from '@loopback/rest';
-import {ApplicationMetadata} from '@loopback/core';
+} from '@loopback/core';
+
 /**
  * This class will be bound to the application as an `Interceptor` during
  * `boot`
  */
 @globalInterceptor('', {tags: {name: 'authorize'}})
 export class AuthorizeInterceptor implements Provider<Interceptor> {
-  constructor (
-    @inject(AuthenticationBindings.METADATA)
-    public metadata: ApplicationMetadata,
-    @inject.getter(AuthenticationBindings.CURRENT_USER)
-    public getCurrentUser: Getter<MyUserProfile>,
-  ) {}
+  /*
+  constructor() {}
+  */
 
   /**
    * This method is used by LoopBack context to produce an interceptor function
@@ -49,30 +37,10 @@ export class AuthorizeInterceptor implements Provider<Interceptor> {
     invocationCtx: InvocationContext,
     next: () => ValueOrPromise<InvocationResult>,
   ) {
-    // eslint-disable-next-line no-useless-catch
     try {
       // Add pre-invocation logic here
-      console.log('Log from authorize global interceptor');
-      console.log(this.metadata);
-      //if you will not provide options in your @authenticate decorator
-      //this line will be executed
-      if (!this.metadata) return await next();
-
       const result = await next();
-      const requiredPermissions = this.metadata.options as unknown as RequiredPermissions;
-      console.log(requiredPermissions);
-      const user = await this.getCurrentUser();
-      console.log('User Permissions: ', user.permissions);
-
-      const results = intersection(
-        user.permissions,
-        requiredPermissions.required,
-      ).length;
-      if (results !== requiredPermissions.required.length) {
-        throw new HttpErrors.Forbidden('INVALID ACCESS PERMISSIONS');
-      }
-
-      //check the user permissions
+      // Add post-invocation logic here
       return result;
     } catch (err) {
       // Add error handling logic here

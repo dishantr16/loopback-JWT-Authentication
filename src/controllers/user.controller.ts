@@ -46,8 +46,7 @@ export class UserController {
   async signup(@requestBody() userData: User) {
     validateCredentials(_.pick(userData, ['email', 'password']));
     userData.permission = [PermissionKeys.AccessAuthFeature];
-    //encrypt the user password
-    // eslint-disable-next-line require-atomic-updates
+
     userData.password = await this.hasher.hashPassword(userData.password);
 
     const savedUser = await this.userRepository.create(userData);
